@@ -1,0 +1,125 @@
+ 
+openapi: 3.0.2
+info:
+    title: File-Server-APIs
+    version: 1.0.0
+servers:
+    -
+        url: 'https://file.iudx.org.in'
+        description: IUDX File Server
+paths:
+    /iudx/v1/upload:
+        post:
+            tags:
+              - File Upload
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/fileUploadResponse'
+                    description: Successful query
+                '400':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/standardBadRequestErrorResponse'
+                    description: Bad query
+                '404':
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/standardInvalidTokenErrorResponse'
+                    description: Resource not found
+            summary: Sample file upload.
+            requestBody:
+                description: Upload a sample file.
+                content:
+                    multipart/form-data:
+                        schema:
+                            type: object
+                            properties:
+                                id:
+                                  description: __IUDX Resource ID__ - Resource Group ID for a group level upload (or) Resource Item ID for an item level upload.
+                                  type: string
+                                isSample:
+                                  description: This should to be __*true*__ for sample file upload, is __*false*__ otherwise.
+                                  type: string
+                                file:
+                                  format: binary
+                                  description: Path of the sample file to be uploaded.
+                                  type: string
+                                startTime:
+                                  description: Start date-time in ISO8601 format of the file data to be uploaded.
+                                  type: string
+                                  format: date-time
+                                endTime:
+                                  description: End date-time in ISO8601 format of the file data to be uploaded.
+                                  type: string
+                                  format: date-time
+                                geometry:
+                                  description: GeoJSON geometry type w.r.t the file data to be uploaded.
+                                  type: string
+                                  enum: [Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection]
+                                coordinates:
+                                  description: Coordinates of the GeoJSON geometry type specified in the geometry w.r.t the file data to be uploaded.
+                                  type: array
+                                  items:
+                                    type: number
+                required: true
+        parameters:
+            -
+                name: token
+                description: Valid authentication token obtained from IUDX authorization service.
+                schema:
+                    type: string
+                in: header
+                required: true
+components:
+    schemas:
+        fileUploadResponse:
+          title: fileUploadSuccessResponse
+          required:
+            - fileId
+          properties:
+            type:
+              format: int32
+              type: integer
+            fileId:
+              type: string
+          example:
+            type: 200
+            fileId: >-
+              iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.org.in/example-group/example-item/sample.json
+        standardBadRequestErrorResponse:
+          title: standardBadRequestErrorResponse
+          properties:
+            type:
+              format: int32
+              type: integer
+            title:
+              type: string
+            detail:
+              type: string
+          example:
+            type: 400
+            title: Bad Request Data
+            detail: Bad query
+        standardInvalidTokenErrorResponse:
+          title: standardInvalidTokenErrorResponse
+          properties:
+            type:
+              format: int32
+              type: integer
+            title:
+              type: string
+            detail:
+              type: string
+          example:
+            type: 401
+            title: Invalid credentials
+            detail: Invalid credentials
+tags:
+    -
+        name: File Upload
+        description: Uploading a file at resource-group level (or) resource-item level to the IUDX File Server.
